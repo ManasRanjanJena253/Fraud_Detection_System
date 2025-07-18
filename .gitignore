@@ -1,2 +1,4 @@
 .idea
 model/data/creditcard.csv
+model/data/test_data.csv
+model/data/resampled_train_data.csv
