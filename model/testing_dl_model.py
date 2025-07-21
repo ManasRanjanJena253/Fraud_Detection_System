@@ -4,7 +4,6 @@ import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 class AutoEncoder(nn.Module):
     def __init__(self, input_dim):
@@ -68,7 +67,7 @@ model.eval()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-# Convert input to tensor
+# Converting the input to tensor
 X_tensor = torch.tensor(X_test_scaled, dtype=torch.float32).to(device)
 
 # Forward pass (no gradient needed)
