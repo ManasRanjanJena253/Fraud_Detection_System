@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from imblearn.over_sampling import SVMSMOTE  # Using SVMSMOTE because it is much better for extreme class imbalance in binary classification. And it creates a better decision boundary which will help with classification.
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 data = pd.read_csv("data/creditcard.csv")
 
@@ -28,10 +28,10 @@ test_data = np.concatenate((X_test, y_test.to_numpy().reshape(-1, 1)), axis = -1
 test_df = pd.DataFrame(test_data, columns = data.columns.tolist())
 test_df.to_csv("data/test_data.csv", index = False)
 
-std_scaler = StandardScaler()
-X_scaled = std_scaler.fit_transform(X_train)
-with open("saved_models/standard_scaler.pkl", "wb") as f:
-    pickle.dump(std_scaler, f)
+min_max_scaler = MinMaxScaler()
+X_scaled = min_max_scaler.fit_transform(X_train)
+with open("saved_models/min_max_scaler.pkl", "wb") as f:
+    pickle.dump(min_max_scaler, f)
 
 sm = SVMSMOTE(random_state = 21)
 X_res, y_res = sm.fit_resample(X_scaled, y_train)

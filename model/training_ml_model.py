@@ -30,10 +30,10 @@ print("Model Training Started")
 
 model.fit(X_train, y_train)
 
-with open("saved_models/standard_scaler.pkl", "rb") as f:
-    std_scaler = pickle.load(f)
+with open("saved_models/min_max_scaler.pkl", "rb") as f:
+    min_max_scaler = pickle.load(f)
 
-X_test_scaled = std_scaler.transform(X_test)
+X_test_scaled = min_max_scaler.transform(X_test)
 
 y_pred = model.predict(X_test_scaled)
 
