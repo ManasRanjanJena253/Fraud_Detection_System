@@ -4,6 +4,7 @@ import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 class AutoEncoder(nn.Module):
     def __init__(self, input_dim):
@@ -46,10 +47,14 @@ class AutoEncoder(nn.Module):
         return decoded
 
 
-# Load and prepare test data
+# Loading test data
 test_data = pd.read_csv("data/test_data.csv")
-X_test = test_data.drop(test_data[test_data["Class"] == 1].index, inplace=False)
-X_test = X_test.drop(columns=["Class"])  # Droping the label column
+X_test = test_data.drop(test_data[test_data["Class"] == 1].index, inplace = False)
+
+sns.displot(test_data["Class"])
+plt.show()
+
+X_test = X_test.drop(columns = ["Class"])  # Dropping the label column
 
 # Applying MinMaxScaler
 with open("saved_models/min_max_scaler.pkl", "rb") as f:
@@ -63,22 +68,22 @@ model = AutoEncoder(input_dim = input_dim)
 model.load_state_dict(torch.load("saved_models/autoencoder_model.pth"))
 model.eval()
 
-# Move model and data to GPU if available
+# Moving the model and data to GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
 # Converting the input to tensor
 X_tensor = torch.tensor(X_test_scaled, dtype=torch.float32).to(device)
 
-# Forward pass (no gradient needed)
+# Making predictions
 with torch.inference_mode():
     reconstructed = model(X_tensor).cpu().numpy()
 
-# Compare one sample visually
+# Comparing one sample visually
 idx = np.random.randint(0, len(X_test_scaled))
-plt.figure(figsize=(12, 4))
-plt.plot(X_test_scaled[idx], label='Original')
-plt.plot(reconstructed[idx], label='Reconstructed')
+plt.figure(figsize = (12, 4))
+plt.plot(X_test_scaled[idx], label = 'Original')
+plt.plot(reconstructed[idx], label = 'Reconstructed')
 plt.legend()
 plt.title(f"Sample #{idx} Reconstruction")
 plt.show()
