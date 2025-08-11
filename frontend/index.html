@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Transactional Fraud Detection App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sleek font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #2878B5;
+      --highlight-orange: #F29D50;
+      --accent-yellow: #FFD166;
+      --offwhite-bg: #F7FAFC;
+      --offwhite-panel: #F3F3F3;
+      --text-dark: #222;
+      --text-light: #666;
+      --border-radius: 16px;
+      --shadow: 0 4px 24px rgba(40,120,181,0.08);
+      --transition: 0.3s cubic-bezier(.53,.01,.36,1);
+    }
+
+    body {
+      background: var(--offwhite-bg);
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: var(--text-dark);
+      margin: 0;
+      min-height: 100vh;
+      transition: background 0.4s;
+    }
+
+    header {
+      padding: 2rem 0 1rem 0;
+      text-align: center;
+      background: linear-gradient(90deg, var(--primary-blue) 0%, var(--highlight-orange) 100%);
+      color: white;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      animation: fadeInDown 0.7s;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: var(--offwhite-panel);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 2rem 2.5rem 2rem 2.5rem;
+      animation: fadeIn 1s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98);}
+      to { opacity: 1; transform: scale(1);}
+    }
+
+    h1 {
+      letter-spacing: 2px;
+      font-weight: 700;
+      font-size: 2.2rem;
+      margin-bottom: 0.2rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.6rem;
+      color: var(--primary-blue);
+      font-weight: 600;
+    }
+
+    .upload-panel {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      transition: box-shadow var(--transition);
+    }
+    .upload-panel:hover {
+      box-shadow: 0 8px 32px rgba(40,120,181,0.18);
+    }
+
+    .custom-file-input {
+      display: inline-block;
+      padding: 0.7rem 1.2rem;
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: background var(--transition), transform var(--transition);
+      outline: none;
+    }
+    .custom-file-input:hover, .custom-file-input:focus {
+      background: var(--highlight-orange);
+      transform: scale(1.03);
+    }
+
+    .loader {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 4px solid var(--accent-yellow);
+      border-top: 4px solid var(--primary-blue);
+      animation: spin 1s linear infinite;
+      margin-left: 1rem;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0);}
+      100% { transform: rotate(360deg);}
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.2rem;
+      background: white;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      font-size: 0.98rem;
+      animation: fadeInUp 0.7s;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    .data-table th, .data-table td {
+      padding: 0.7rem 0.3rem;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+    .data-table th {
+      background: var(--primary-blue);
+      color: white;
+      font-weight: 600;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table tr.selected {
+      background: var(--highlight-orange);
+      color: white;
+      transition: background var(--transition), color var(--transition);
+    }
+    .data-table tr:hover {
+      background: var(--accent-yellow);
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .actions {
+      margin: 1.2rem 0;
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--highlight-orange);
+      color: var(--text-dark);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: var(--shadow);
+      transition: background var(--transition), transform var(--transition);
+      outline: none;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .btn:after {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background: var(--accent-yellow);
+      opacity: 0;
+      transition: opacity 0.25s;
+      z-index: -1;
+      border-radius: var(--border-radius);
+    }
+    .btn:hover, .btn:focus {
+      background: var(--primary-blue);
+      color: white;
+      transform: scale(1.04);
+    }
+    .btn:active:after {
+      opacity: 0.2;
+    }
+
+    .result-panel {
+      background: var(--accent-yellow);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 1.2rem 1.7rem;
+      margin-top: 1.5rem;
+      animation: fadeInUp 0.8s;
+      font-size: 1.1rem;
+    }
+    .result-panel strong {
+      color: var(--primary-blue);
+      font-size: 1.2em;
+    }
+
+    .reconstruction-img {
+      max-width: 100%;
+      margin-top: 1.2rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 24px rgba(40,120,181,0.12);
+      animation: fadeIn 1.1s;
+      border: 2px solid var(--highlight-orange);
+      background: var(--offwhite-panel);
+      transition: box-shadow var(--transition);
+    }
+    .reconstruction-img:hover {
+      box-shadow: 0 8px 32px rgba(40,120,181,0.22);
+      border-color: var(--primary-blue);
+    }
+
+    .footer {
+      text-align: center;
+      margin: 3rem 0 1rem 0;
+      color: var(--text-light);
+      font-size: 0.98rem;
+    }
+    .footer a {
+      color: var(--primary-blue);
+      text-decoration: none;
+      margin: 0 0.2em;
+      font-weight: 600;
+      transition: color var(--transition);
+    }
+    .footer a:hover {
+      color: var(--highlight-orange);
+      text-decoration: underline;
+    }
+    /* Subtle fade-in for any element */
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 0.7s forwards;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Transactional Fraud Detection</h1>
+    <div style="font-size:1.05rem; font-weight:400; letter-spacing:1px;">
+      Sleek, Interactive, and Accurate.
+    </div>
+  </header>
+  <main>
+    <h2>1. Upload Transaction Data (CSV)</h2>
+    <form id="uploadForm" class="upload-panel" enctype="multipart/form-data">
+      <input type="file" id="csvFile" accept=".csv" style="display:none" required>
+      <label for="csvFile" class="custom-file-input">Select CSV File</label>
+      <span id="fileName" style="color:var(--primary-blue); font-weight:500;"></span>
+      <button type="submit" class="btn">Upload & Process</button>
+      <span id="uploadLoader" style="display:none" class="loader"></span>
+    </form>
+
+    <div id="dataSection" style="display:none;">
+      <h2>2. Select a Transaction Row</h2>
+      <div style="font-size:0.98rem; color:var(--text-light); margin-bottom:0.5rem;">
+        Click a row to select for prediction or reconstruction graph.
+      </div>
+      <div id="tableContainer"></div>
+      <div class="actions" id="rowActions" style="display:none;">
+        <button class="btn" id="predictBtn">Predict Fraud</button>
+        <button class="btn" id="reconstructBtn">Show Reconstruction Graph</button>
+        <span id="rowLoader" style="display:none" class="loader"></span>
+      </div>
+    </div>
+
+    <div id="resultPanel" style="display:none;"></div>
+    <div id="reconstructionPanel" style="display:none;"></div>
+
+  </main>
+  <div class="footer">
+    <span>Created by <a href="https://github.com/ManasRanjanJena253" target="_blank">Manas Ranjan Jena</a></span> &middot;
+    <span>Open Source on <a href="https://github.com/ManasRanjanJena253" target="_blank">GitHub</a></span>
+  </div>
+
+  <script>
+    // API URLs
+    const UPLOAD_API = "/upload_csv";
+    const PREDICT_API = "/upload_csv/predict";
+    const RECONSTRUCT_API = "/upload_csv/reconstruction_graph";
+
+    // State
+    let scaledData = [];
+    let selectedIdx = null;
+    let selectedRow = null;
+
+    // DOM
+    const uploadForm = document.getElementById('uploadForm');
+    const csvFileInput = document.getElementById('csvFile');
+    const fileNameSpan = document.getElementById('fileName');
+    const uploadLoader = document.getElementById('uploadLoader');
+    const dataSection = document.getElementById('dataSection');
+    const tableContainer = document.getElementById('tableContainer');
+    const rowActions = document.getElementById('rowActions');
+    const predictBtn = document.getElementById('predictBtn');
+    const reconstructBtn = document.getElementById('reconstructBtn');
+    const rowLoader = document.getElementById('rowLoader');
+    const resultPanel = document.getElementById('resultPanel');
+    const reconstructionPanel = document.getElementById('reconstructionPanel');
+
+    // Custom file input interaction
+    document.querySelector('.custom-file-input').onclick = () => {
+      csvFileInput.click();
+    };
+    csvFileInput.onchange = e => {
+      if (csvFileInput.files.length > 0) {
+        fileNameSpan.textContent = csvFileInput.files[0].name;
+      } else {
+        fileNameSpan.textContent = "";
+      }
+    };
+
+    // Handle CSV upload
+    uploadForm.onsubmit = async function(e) {
+      e.preventDefault();
+      if (!csvFileInput.files.length) {
+        fileNameSpan.textContent = "Please select a CSV file!";
+        return;
+      }
+      uploadLoader.style.display = "inline-block";
+      fileNameSpan.textContent = "";
+      resultPanel.style.display = 'none';
+      reconstructionPanel.style.display = 'none';
+      tableContainer.innerHTML = '';
+      rowActions.style.display = 'none';
+      dataSection.style.display = 'none';
+      selectedIdx = null;
+      selectedRow = null;
+
+      // Upload the CSV
+      const formData = new FormData();
+      formData.append("file", csvFileInput.files[0]);
+      try {
+        const response = await fetch(UPLOAD_API, {
+          method: "POST",
+          body: formData
+        });
+        const resJson = await response.json();
+        uploadLoader.style.display = "none";
+        if (resJson.ERROR) {
+          fileNameSpan.textContent = "Upload Error: " + resJson.ERROR;
+          return;
+        }
+        scaledData = resJson.Data;
+        if (!scaledData || !scaledData.length) {
+          fileNameSpan.textContent = "No data found in uploaded file.";
+          return;
+        }
+        showTable(scaledData);
+        dataSection.style.display = 'block';
+      } catch (err) {
+        uploadLoader.style.display = "none";
+        fileNameSpan.textContent = "Upload Failed!";
+      }
+    };
+
+    // Display data table
+    function showTable(data) {
+      // Show only first 12 columns for preview; show more on click
+      const colCount = (data[0] && data[0].length) || 0;
+      let headers = [];
+      for (let i = 0; i < colCount; ++i) headers.push("F" + (i+1));
+      let html = '<table class="data-table"><thead><tr><th>#</th>';
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += '</tr></thead><tbody>';
+      data.forEach((row, idx) => {
+        html += `<tr data-idx="${idx}"><td>${idx+1}</td>`;
+        row.forEach(cell => html += `<td>${Number(cell).toFixed(3)}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      tableContainer.innerHTML = html;
+
+      // Row select
+      const tableRows = tableContainer.querySelectorAll('tbody tr');
+      tableRows.forEach(rowEl => {
+        rowEl.onclick = () => {
+          tableRows.forEach(r => r.classList.remove('selected'));
+          rowEl.classList.add('selected');
+          selectedIdx = Number(rowEl.getAttribute('data-idx'));
+          selectedRow = scaledData[selectedIdx];
+          rowActions.style.display = 'flex';
+          resultPanel.style.display = 'none';
+          reconstructionPanel.style.display = 'none';
+        };
+      });
+    }
+
+    // Prediction button
+    predictBtn.onclick = async function() {
+      if (selectedIdx === null) return;
+      rowLoader.style.display = "inline-block";
+      resultPanel.style.display = 'none';
+      reconstructionPanel.style.display = 'none';
+
+      const payload = {
+        data: scaledData,
+        idx: selectedIdx
+      };
+      try {
+        const response = await fetch(PREDICT_API, {
+          method: "POST",
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const resJson = await response.json();
+        rowLoader.style.display = "none";
+        showResult(resJson);
+      } catch (err) {
+        rowLoader.style.display = "none";
+        showResult({ERROR: "Prediction failed."});
+      }
+    };
+
+    // Show reconstruction graph
+    reconstructBtn.onclick = async function() {
+      if (selectedIdx === null) return;
+      rowLoader.style.display = "inline-block";
+      reconstructionPanel.style.display = 'none';
+
+      const payload = {
+        data: scaledData,
+        idx: selectedIdx
+      };
+      try {
+        // The endpoint returns an image
+        const response = await fetch(RECONSTRUCT_API, {
+          method: "POST",
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (response.ok && response.headers.get("Content-Type").includes("image/png")) {
+          const blob = await response.blob();
+          const imgUrl = URL.createObjectURL(blob);
+          showReconstruction(imgUrl);
+        } else {
+          const resJson = await response.json();
+          showReconstruction(null, resJson.ERROR || "Could not retrieve graph.");
+        }
+        rowLoader.style.display = "none";
+      } catch (err) {
+        rowLoader.style.display = "none";
+        showReconstruction(null, "Failed to get reconstruction graph.");
+      }
+    };
+
+    // Show prediction result
+    function showResult(res) {
+      resultPanel.innerHTML = "";
+      if (res.ERROR) {
+        resultPanel.innerHTML = `<div class="result-panel fade-in"><strong>Error:</strong> ${res.ERROR}</div>`;
+      } else {
+        let color = res['Predicted Class'] === "Fraud" ? "red"
+                  : res['Predicted Class'] === "Risky" ? "orange"
+                  : "green";
+        resultPanel.innerHTML = `
+          <div class="result-panel fade-in" style="border-left:6px solid ${color};">
+            <strong>Prediction:</strong> <span style="color:${color}; font-weight:bold;">${res['Predicted Class']}</span><br>
+            <strong>Confidence:</strong> ${Number(res['Pred Confidence']).toFixed(1)}%<br>
+            <strong>Reconstruction Error:</strong> ${res['Reconstruction Error']}
+          </div>
+        `;
+      }
+      resultPanel.style.display = 'block';
+    }
+
+    // Show reconstruction graph
+    function showReconstruction(imgUrl, errorMsg) {
+      if (imgUrl) {
+        reconstructionPanel.innerHTML = `
+          <div style="margin-top:1.2rem;">
+            <img src="${imgUrl}" alt="Reconstruction Graph" class="reconstruction-img fade-in">
+            <div style="text-align:center; font-size:0.99rem; color:var(--text-light); margin-top:0.5rem;">Original vs Reconstructed Transaction</div>
+          </div>
+        `;
+      } else {
+        reconstructionPanel.innerHTML = `<div class="result-panel fade-in"><strong>Error:</strong> ${errorMsg}</div>`;
+      }
+      reconstructionPanel.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

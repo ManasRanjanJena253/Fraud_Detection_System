@@ -35,6 +35,7 @@ async def greetings():
 async def upload_csv(file: UploadFile = File(...)):
     """
     Endpoint to upload csv files by the user for predictions.
+    :param file : The csv file containing the transaction data.
     """
     try:
         contents = await file.read()
@@ -58,6 +59,8 @@ async def upload_csv(file: UploadFile = File(...)):
 async def show_reconstruction_graph(data: list, idx: int = None):
     """
     Endpoint to show the plot difference between actual data and reconstructed data.
+    :param idx : The index of the row that the user want to see the reconstructed graph of.
+    :param data : The csv file.
     """
     try:
         model = AutoEncoder()
